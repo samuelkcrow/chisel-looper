@@ -1,11 +1,13 @@
 // See README.md for license details.
 
-package gcd
+package looper
 
 import chisel3._
 import chiseltest._
 import org.scalatest.freespec.AnyFreeSpec
 import chisel3.experimental.BundleLiterals._
+import scala.collection.mutable.ArrayBuffer
+
 
 /**
   * This is a trivial example of how to run this Specification
@@ -18,7 +20,7 @@ import chisel3.experimental.BundleLiterals._
   * sbt 'testOnly gcd.GcdDecoupledTester'
   * }}}
   */
-class GCDSpec extends AnyFreeSpec with ChiselScalatestTester {
+class LooperTester extends AnyFreeSpec with ChiselScalatestTester {
 
   "Gcd should calculate proper greatest common denominator" in {
     test(new DecoupledGcd(16)) { dut =>
