@@ -9,25 +9,28 @@ import scala.collection.mutable.ArrayBuffer
 
 
 /**
-  * This is a trivial example of how to run this Specification
-  * From within sbt use:
-  * {{{
-  * testOnly gcd.GcdDecoupledTester
-  * }}}
-  * From a terminal shell use:
-  * {{{
-  * sbt 'testOnly gcd.GcdDecoupledTester'
-  * }}}
+  * Test the Chisel implementation of the looper
   */
 class LooperTester extends AnyFlatSpec with ChiselScalatestTester {
   behavior of "Looper"
-  it should "do something" in {
-    val p = LooperParams(32, 4, 4)
+  it should "read in then out a single loop" in {
+    val p = LooperParams(numSamples = 10, bytesPerSample = 2)
+    val loop: ArrayBuffer[Int] = ArrayBuffer.fill(p.numSamples)(0)
+    for (index <- 0 until p.numSamples) {
+      loop(index) = index
+    }
     test(new Looper(p)).withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
-      dut.io.in.poke(0.U)
-      dut.clock.step()
-
-      dut.io.out.expect(block)
+      dut.io.loadLoop.poke(true.B)
+      for (index <- 0 until p.numSamples) {
+        dut.io.sampleIn.poke(loop(index))
+        dut.clock.step()
+      }
+      dut.io.loadLoop.poke(false.B)
+      dut.io.playLoop.poke(true.B)
+      for (index <- 0 until p.numSamples) {
+        dut.io.sampleOut.expect(loop(index).S)
+        dut.clock.step()
+      }
     }
   }
 }

@@ -6,9 +6,7 @@ A looper is an audio effect used for building up combined musical phrases, commo
 recreate the live looping behavior often found in guitar effects pedals such as
 [these ones](https://www.guitarcenter.com/Looper-Effects-Pedals.gc).
 
-## Using this repository
-
-### Dependencies
+## Dependencies
 
 #### JDK 11
 
@@ -26,6 +24,11 @@ You can download it [here](https://www.scala-sbt.org/download.html).
 used for audio input files ([examples](./files)) by this program. It can also play these raw files via the
 included [bash script](./files/play_raw.sh), and play other audio files. See the SoX man pages for details.
 
-### How to get started
+## Usage
 
-#### ¯\\\_(ツ)_/¯
+#### Run Tests with SBT 
+
+```
+sbt test
+```
+That's all you can really do right now ... :)
