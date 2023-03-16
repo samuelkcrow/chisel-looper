@@ -20,6 +20,7 @@ class LooperTester extends AnyFlatSpec with ChiselScalatestTester {
 
   it should "read in then out a single loop" in {
     val p = LooperParams(numSamples = 8000, bytesPerSample = 1)
+    val m = new LooperModel(p)
 
     // my input files have a null termination byte so I have to add the same
     val outBuffer: ArrayBuffer[Byte] = ArrayBuffer.fill(p.numSamples + 1)(0)
@@ -33,13 +34,14 @@ class LooperTester extends AnyFlatSpec with ChiselScalatestTester {
       dut.io.loadLoop.poke(true.B)
       for (index <- 0 until p.numSamples) {
         dut.io.sampleIn.poke(loop(index))
+        m.inputSample(loop(index))
         dut.clock.step()
       }
       dut.io.loadLoop.poke(false.B)
       dut.clock.step(20) // step in the idle state, sanity check
       dut.io.playLoop.poke(true.B)
       for (index <- 0 until p.numSamples) {
-        dut.io.sampleOut.expect(loop(index).S)
+        dut.io.sampleOut.expect(m.outputSample())
         outBuffer(index) = dut.io.sampleOut.peekInt().toByte
         dut.clock.step()
       }
