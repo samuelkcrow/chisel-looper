@@ -19,7 +19,7 @@ class LooperTester extends AnyFlatSpec with ChiselScalatestTester {
   val audio_440Hz = f.readAudio("files/8bit8khzRaw/440Hz_-3dBFS_1s.raw")
 
   it should "read in then out a single loop" in {
-    val p = LooperParams(numSamples = 8000, bytesPerSample = 1)
+    val p = LooperParams(numSamples = 8000, bytesPerSample = 1, maxLoops = 1)
     val m = new LooperModel(p)
 
     // my input files have a null termination byte so I have to add the same
@@ -51,7 +51,7 @@ class LooperTester extends AnyFlatSpec with ChiselScalatestTester {
   }
 
   it should "read in two loops and play out the combination" in {
-    val p = LooperParams(numSamples = 8000, bytesPerSample = 1)
+    val p = LooperParams(numSamples = 8000, bytesPerSample = 1, maxLoops = 2)
     val m = new LooperModel(p)
 
     // my input files have a null termination byte so I have to add the same
@@ -69,18 +69,21 @@ class LooperTester extends AnyFlatSpec with ChiselScalatestTester {
     test(new Looper(p)).withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
       dut.clock.setTimeout(30000)
       dut.io.loadLoop.poke(true.B)
+      dut.io.loadAddr.poke(0)
       for (index <- 0 until p.numSamples) {
         dut.io.sampleIn.poke(loop1(index))
         m.inputSample(loop1(index))
         dut.clock.step()
       }
+      dut.io.loadAddr.poke(1)
+      m.setLoopAddr(1)
       for (index <- 0 until p.numSamples) {
         dut.io.sampleIn.poke(loop2(index))
         m.inputSample(loop2(index))
         dut.clock.step()
       }
       dut.io.loadLoop.poke(false.B)
-      dut.clock.step(20) // step in the idle state, sanity check
+      dut.clock.step(400) // step in the idle state, makes output easier to find
       dut.io.playLoop.poke(true.B)
       for (index <- 0 until p.numSamples) {
         dut.io.sampleOut.expect(m.outputSample())

@@ -13,7 +13,7 @@ class LooperModelTester extends AnyFlatSpec {
   val audio_dtone = f.readAudio("files/8bit8khzRaw/dial_tone.raw")
 
   it should "read in then out a single loop" in {
-    val p = LooperParams(numSamples = 8000, bytesPerSample = 1)
+    val p = LooperParams(numSamples = 8000, bytesPerSample = 1, maxLoops = 1)
     val m = new LooperModel(p)
 
     // my input files have a null termination byte so I have to add the same
@@ -33,12 +33,10 @@ class LooperModelTester extends AnyFlatSpec {
       assert(sampleOut == loop(index))
       outBuffer(index) = sampleOut.toByte
     }
-
-    f.writeAudio("files/out/scala350.raw", outBuffer.toArray)
   }
 
   it should "read in two loops and play out the combination" in {
-    val p = LooperParams(numSamples = 8000, bytesPerSample = 1)
+    val p = LooperParams(numSamples = 8000, bytesPerSample = 1, maxLoops = 2)
     val m = new LooperModel(p)
 
     val outBuffer: ArrayBuffer[Byte] = ArrayBuffer.fill(p.numSamples + 1)(0)
@@ -55,6 +53,7 @@ class LooperModelTester extends AnyFlatSpec {
     }
 
     // read in the second loop
+    m.setLoopAddr(1)
     for (index <- 0 until p.numSamples) {
       loop(index) = audio_440Hz(index).toInt
       sumLoop(index) += loop(index)
@@ -69,7 +68,5 @@ class LooperModelTester extends AnyFlatSpec {
       assert(sampleOut == audio_dtone(index).toInt) // confirm against known good audio
       outBuffer(index) = sampleOut.toByte
     }
-
-//    f.writeAudio("files/out/scalaDT.raw", outBuffer.toArray)
   }
 }
