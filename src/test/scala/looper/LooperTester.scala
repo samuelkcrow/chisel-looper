@@ -29,6 +29,7 @@ class LooperTester extends AnyFlatSpec with ChiselScalatestTester {
     for (index <- 0 until p.numSamples) {
       loop(index) = audio_350Hz(index).toInt
     }
+
     test(new Looper(p)).withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
       dut.clock.setTimeout(20000)
       dut.io.loadLoop.poke(true.B)
@@ -46,6 +47,47 @@ class LooperTester extends AnyFlatSpec with ChiselScalatestTester {
         dut.clock.step()
       }
       f.writeAudio("files/out/chisel350.raw", outBuffer.toArray)
+    }
+  }
+
+  it should "read in two loops and play out the combination" in {
+    val p = LooperParams(numSamples = 8000, bytesPerSample = 1)
+    val m = new LooperModel(p)
+
+    // my input files have a null termination byte so I have to add the same
+    val outBuffer: ArrayBuffer[Byte] = ArrayBuffer.fill(p.numSamples + 1)(0)
+
+    val loop1: ArrayBuffer[Int] = ArrayBuffer.fill(p.numSamples)(0)
+    for (index <- 0 until p.numSamples) {
+      loop1(index) = audio_350Hz(index).toInt
+    }
+    val loop2: ArrayBuffer[Int] = ArrayBuffer.fill(p.numSamples)(0)
+    for (index <- 0 until p.numSamples) {
+      loop2(index) = audio_440Hz(index).toInt
+    }
+
+    test(new Looper(p)).withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
+      dut.clock.setTimeout(30000)
+      dut.io.loadLoop.poke(true.B)
+      for (index <- 0 until p.numSamples) {
+        dut.io.sampleIn.poke(loop1(index))
+        m.inputSample(loop1(index))
+        dut.clock.step()
+      }
+      for (index <- 0 until p.numSamples) {
+        dut.io.sampleIn.poke(loop2(index))
+        m.inputSample(loop2(index))
+        dut.clock.step()
+      }
+      dut.io.loadLoop.poke(false.B)
+      dut.clock.step(20) // step in the idle state, sanity check
+      dut.io.playLoop.poke(true.B)
+      for (index <- 0 until p.numSamples) {
+        dut.io.sampleOut.expect(m.outputSample())
+        outBuffer(index) = dut.io.sampleOut.peekInt().toByte
+        dut.clock.step()
+      }
+      f.writeAudio("files/out/chiselDT.raw", outBuffer.toArray)
     }
   }
 }

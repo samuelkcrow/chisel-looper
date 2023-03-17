@@ -13,7 +13,8 @@ class LooperModel(p: LooperParams) {
   // it's not really necessary when loading, but more consistent this way
   def inputSample(sampleValue: Int): Unit = {
     loadIndex = (loadIndex + 1) % p.numSamples
-    loopMem(loadIndex) = sampleValue
+    loopMem(loadIndex) += sampleValue
+    loopMem(loadIndex) = loopMem(loadIndex).min(127).max(-128) // saturating addition
   }
 
   def outputSample(): Int = {
