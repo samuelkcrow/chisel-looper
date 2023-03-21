@@ -2,9 +2,7 @@ Chisel Looper
 =======================
 
 A looper is an audio effect used for building up combined musical phrases, commonly known as 
-[Live Looping](https://en.wikipedia.org/wiki/Live_looping). This project aims use CHISEL to 
-recreate the live looping behavior often found in guitar effects pedals such as
-[these ones](https://www.guitarcenter.com/Looper-Effects-Pedals.gc).
+[Live Looping](https://en.wikipedia.org/wiki/Live_looping). This project uses Chisel to recreate this live looping behavior in hardware.
 
 ## Dependencies
 
@@ -18,11 +16,11 @@ or use the prebuilt binaries from [AdoptOpenJDK](https://adoptopenjdk.net/).
 SBT is the most common built tool in the Scala community. 
 You can download it [here](https://www.scala-sbt.org/download.html).  
 
-#### SoX (recommended)
+#### SoX (not a dependency but recommended)
 
 [SoX](https://en.wikipedia.org/wiki/SoX) can be used to convert most audio formats to the raw (PCM) format
 used for audio input files ([examples](./files)) by this program. It can also play these raw files via the
-included [bash script](./files/play_raw.sh), and play other audio files. See the SoX man pages for details.
+included bash scripts, and play other audio files. See the SoX man pages for details.
 
 ## Usage
 
@@ -31,4 +29,8 @@ included [bash script](./files/play_raw.sh), and play other audio files. See the
 ```
 sbt test
 ```
-That's all you can really do right now ... :)
+The tests contain examples of how to use the chisel generator to input and output loops with raw audio PCM files.
+
+## Documentation
+
+The Chisel generator's internals are documented with inline code comments.
